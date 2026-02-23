@@ -1,13 +1,18 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter using Gmail SMTP
+// Create transporter using Gmail SMTP with explicit host/port for Render
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // use SSL
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     }
 });
+
+// Debug: Check if email credentials are loaded (without exposing password)
+console.log('Email configuration initialized for:', process.env.EMAIL_USER ? process.env.EMAIL_USER : 'MISSING_EMAIL_USER');
 
 // Send order confirmation email to buyer
 const sendOrderConfirmationEmail = async (buyerEmail, buyerName, orderDetails) => {
