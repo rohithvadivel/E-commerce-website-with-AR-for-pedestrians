@@ -6,10 +6,10 @@
 const isDev = import.meta.env.DEV;
 
 // In development, use empty string so requests go through Vite proxy
-// In production, use the actual API server URL
+// In production, use the actual API server URL from environment variables, fallback to window.location
 const API_HOST = isDev
     ? '' // Use relative URLs for proxy
-    : `http://${window.location.hostname}:5000`;
+    : (import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000`);
 
 export const API_BASE_URL = API_HOST;
 
