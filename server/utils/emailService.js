@@ -1,18 +1,9 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-// Create transporter using Gmail SMTP with explicit host/port for Render
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports (uses STARTTLS)
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// Debug: Check if email credentials are loaded (without exposing password)
-console.log('Email configuration initialized for:', process.env.EMAIL_USER ? process.env.EMAIL_USER : 'MISSING_EMAIL_USER');
+// Debug: Check if email credentials are loaded
+console.log('SendGrid configuration initialized. Key present:', process.env.SENDGRID_API_KEY ? 'YES' : 'NO');
 
 // Send order confirmation email to buyer
 const sendOrderConfirmationEmail = async (buyerEmail, buyerName, orderDetails) => {
@@ -73,7 +64,7 @@ const sendOrderConfirmationEmail = async (buyerEmail, buyerName, orderDetails) =
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(mailOptions);
         console.log(`Order confirmation email sent to ${buyerEmail}`);
         return true;
     } catch (error) {
@@ -123,7 +114,7 @@ const sendOTPEmail = async (email, otp) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(mailOptions);
         console.log(`OTP email sent to ${email}`);
         return true;
     } catch (error) {
@@ -207,7 +198,7 @@ const sendOrderEmailToBuyer = async (buyerEmail, orderDetails) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(mailOptions);
         console.log(`Order confirmation email sent to buyer: ${buyerEmail}`);
         return true;
     } catch (error) {
@@ -293,7 +284,7 @@ const sendOrderEmailToSeller = async (sellerEmail, orderDetails) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(mailOptions);
         console.log(`Order notification email sent to seller: ${sellerEmail}`);
         return true;
     } catch (error) {
@@ -352,7 +343,7 @@ const sendDACEmail = async (buyerEmail, buyerName, dacCode, orderId) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(mailOptions);
         console.log(`DAC email sent to ${buyerEmail}`);
         return true;
     } catch (error) {
@@ -403,7 +394,7 @@ const sendPasswordResetOTPEmail = async (email, otp) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(mailOptions);
         console.log(`Password reset OTP email sent to ${email}`);
         return true;
     } catch (error) {
