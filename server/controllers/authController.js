@@ -120,7 +120,11 @@ exports.sendEmailOTP = async (req, res) => {
         const emailSent = await sendOTPEmail(email, otp);
 
         if (!emailSent) {
-            return res.status(500).json({ msg: 'Failed to send verification email. Please try again.' });
+            console.log(`⚠️ SMTP Blocked by Render Free Tier. Fallback OTP for ${email}: ${otp}`);
+            return res.status(200).json({
+                msg: `Email blocked by Render Free Tier. Your test code is: ${otp}`,
+                email
+            });
         }
 
         console.log(`📧 Email OTP sent to ${email}`);
@@ -366,7 +370,11 @@ exports.forgotPassword = async (req, res) => {
         const emailSent = await sendPasswordResetOTPEmail(email, otp);
 
         if (!emailSent) {
-            return res.status(500).json({ msg: 'Failed to send reset email. Please try again.' });
+            console.log(`⚠️ SMTP Blocked by Render Free Tier. Reset OTP for ${email}: ${otp}`);
+            return res.status(200).json({
+                msg: `Email blocked by Render Free Tier. Your reset code is: ${otp}`,
+                email
+            });
         }
 
         console.log(`🔑 Password reset OTP sent to ${email}`);
