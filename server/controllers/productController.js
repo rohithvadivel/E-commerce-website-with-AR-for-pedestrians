@@ -103,3 +103,27 @@ exports.rejectProduct = async (req, res) => {
     }
 };
 
+// Seller: Update product image
+exports.updateProductImage = async (req, res) => {
+    try {
+        const { image } = req.body;
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({ msg: 'Product not found' });
+        }
+
+        // Ensure the seller owns this product
+        if (product.seller.toString() !== req.user.id) {
+            return res.status(403).json({ msg: 'Not authorized' });
+        }
+
+        product.image = image;
+        await product.save();
+        res.json({ msg: 'Image updated successfully', product });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+

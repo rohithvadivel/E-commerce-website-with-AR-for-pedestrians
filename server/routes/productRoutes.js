@@ -8,7 +8,8 @@ const {
     getMyProducts,
     getPendingProducts,
     approveProduct,
-    rejectProduct
+    rejectProduct,
+    updateProductImage
 } = require('../controllers/productController');
 const multer = require('multer');
 const { imageStorage, modelStorage } = require('../config/cloudinary');
@@ -26,6 +27,7 @@ router.post('/', auth, sellerOnly, createProduct);
 router.get('/pending', auth, getPendingProducts);
 router.put('/:id/approve', auth, approveProduct);
 router.put('/:id/reject', auth, rejectProduct);
+router.put('/:id/update-image', auth, sellerOnly, updateProductImage);
 
 // Image upload helper route — returns Cloudinary URL
 router.post('/upload', auth, sellerOnly, uploadImage.single('image'), (req, res) => {
