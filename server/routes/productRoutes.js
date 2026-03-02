@@ -30,21 +30,33 @@ router.put('/:id/reject', auth, rejectProduct);
 router.put('/:id/update-image', auth, sellerOnly, updateProductImage);
 
 // Image upload helper route — returns Cloudinary URL
-router.post('/upload', auth, sellerOnly, uploadImage.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-    }
-    res.json({ filePath: req.file.path }); // Cloudinary secure_url
+router.post('/upload', auth, sellerOnly, (req, res) => {
+    uploadImage.single('image')(req, res, (err) => {
+        if (err) {
+            console.error('Image upload error:', err);
+            return res.status(500).json({ error: 'Image upload failed', details: err.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        console.log('Image uploaded to Cloudinary:', req.file.path);
+        res.json({ filePath: req.file.path });
+    });
 });
 
 // 3D Model upload helper route — returns Cloudinary URL
-router.post('/upload-model', auth, sellerOnly, uploadModel.single('model'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-    }
-    res.json({ filePath: req.file.path }); // Cloudinary secure_url
+router.post('/upload-model', auth, sellerOnly, (req, res) => {
+    uploadModel.single('model')(req, res, (err) => {
+        if (err) {
+            console.error('Model upload error:', err);
+            return res.status(500).json({ error: 'Model upload failed', details: err.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        console.log('Model uploaded to Cloudinary:', req.file.path);
+        res.json({ filePath: req.file.path });
+    });
 });
 
 module.exports = router;
-
-

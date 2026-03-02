@@ -7,13 +7,23 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Log config status on startup
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+    console.log('✅ Cloudinary configured with cloud:', process.env.CLOUDINARY_CLOUD_NAME);
+} else {
+    console.warn('⚠️  Cloudinary NOT configured! Missing env vars:', {
+        CLOUD_NAME: !!process.env.CLOUDINARY_CLOUD_NAME,
+        API_KEY: !!process.env.CLOUDINARY_API_KEY,
+        API_SECRET: !!process.env.CLOUDINARY_API_SECRET,
+    });
+}
+
 // Storage for product images
 const imageStorage = new CloudinaryStorage({
     cloudinary,
     params: {
         folder: 'ecommerce-ar/products',
         allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-        transformation: [{ width: 1000, height: 1000, crop: 'limit', quality: 'auto' }],
     },
 });
 
@@ -23,7 +33,6 @@ const modelStorage = new CloudinaryStorage({
     params: {
         folder: 'ecommerce-ar/models',
         resource_type: 'raw',
-        allowed_formats: ['glb', 'gltf'],
     },
 });
 
