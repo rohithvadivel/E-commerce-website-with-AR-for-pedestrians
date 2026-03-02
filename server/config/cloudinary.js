@@ -30,9 +30,14 @@ const imageStorage = new CloudinaryStorage({
 // Storage for 3D models (.glb, .gltf) — stored as raw files
 const modelStorage = new CloudinaryStorage({
     cloudinary,
-    params: {
-        folder: 'ecommerce-ar/models',
-        resource_type: 'raw',
+    params: async (req, file) => {
+        const ext = file.originalname.split('.').pop();
+        return {
+            folder: 'ecommerce-ar/models',
+            resource_type: 'raw',
+            public_id: `model-${Date.now()}`,
+            format: ext,
+        };
     },
 });
 
