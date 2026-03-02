@@ -44,7 +44,8 @@ const AddProduct = () => {
                     'x-auth-token': token
                 }
             });
-            setFormData(prev => ({ ...prev, image: `${API_BASE_URL}` + res.data.filePath }));
+            // Cloudinary returns full URL in filePath, use directly
+            setFormData(prev => ({ ...prev, image: res.data.filePath }));
             alert('Image Uploaded!');
         } catch (err) {
             console.error(err);
@@ -67,7 +68,8 @@ const AddProduct = () => {
                     'x-auth-token': token
                 }
             });
-            setFormData(prev => ({ ...prev, model3D: `${API_BASE_URL}` + res.data.filePath }));
+            // Cloudinary returns full URL in filePath, use directly
+            setFormData(prev => ({ ...prev, model3D: res.data.filePath }));
             alert('3D Model Uploaded!');
         } catch (err) {
             console.error(err);

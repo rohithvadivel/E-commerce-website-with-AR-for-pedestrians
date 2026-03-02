@@ -13,10 +13,15 @@ const API_HOST = isDev
 
 export const API_BASE_URL = API_HOST;
 
-// Helper function to fix image URLs that were stored with localhost
-// This converts localhost:5000/uploads/... to use the current host
+// Helper function to fix image URLs
+// Handles Cloudinary URLs (full https://), localhost URLs, and relative paths
 export const getImageUrl = (imageUrl) => {
     if (!imageUrl) return '';
+
+    // Cloudinary URLs are already complete — pass through unchanged
+    if (imageUrl.startsWith('https://res.cloudinary.com') || imageUrl.startsWith('http://res.cloudinary.com')) {
+        return imageUrl;
+    }
 
     // In development with proxy, convert to relative URL
     if (isDev) {
@@ -42,4 +47,5 @@ export const getImageUrl = (imageUrl) => {
 };
 
 export default API_BASE_URL;
+
 
