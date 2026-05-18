@@ -363,20 +363,27 @@ exports.processPayment = async (req, res) => {
             );
         }
 
-        // Send emails to both buyer and sellers
-        const buyer = await User.findById(req.user.id);
-        console.log('📧 Order placed by:', buyer.name, `(${buyer.email})`, '- Role:', buyer.role || 'unknown');
-        console.log('📧 Sending order emails to buyer and sellers...');
-        await sendOrderEmails(buyer, cartItems, newOrder._id, totalAmount, shippingAddress);
-
-        // Send DAC code email to buyer
-        if (buyer && buyer.email) {
-            sendDACEmail(buyer.email, buyer.name, dacCode, newOrder._id.toString())
-                .then(() => console.log('🔐 DAC email sent to buyer'))
-                .catch(err => console.error('🔐 DAC email error:', err.message));
-        }
-
+        // Send response immediately - don't block on emails
         res.json({ msg: 'Payment Successful', orderId: newOrder._id });
+
+        // Send emails in the background (non-blocking)
+        try {
+            const buyer = await User.findById(req.user.id);
+            console.log('📧 Order placed by:', buyer.name, `(${buyer.email})`, '- Role:', buyer.role || 'unknown');
+            console.log('📧 Sending order emails in background...');
+            
+            sendOrderEmails(buyer, cartItems, newOrder._id, totalAmount, shippingAddress)
+                .catch(err => console.error('📧 Background email error:', err.message));
+
+            // Send DAC code email to buyer
+            if (buyer && buyer.email) {
+                sendDACEmail(buyer.email, buyer.name, dacCode, newOrder._id.toString())
+                    .then(() => console.log('🔐 DAC email sent to buyer'))
+                    .catch(err => console.error('🔐 DAC email error:', err.message));
+            }
+        } catch (emailErr) {
+            console.error('📧 Email setup error:', emailErr.message);
+        }
 
     } catch (err) {
         console.error(err.message);
