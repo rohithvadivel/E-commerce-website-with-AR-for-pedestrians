@@ -72,8 +72,9 @@ const AddProduct = () => {
             setFormData(prev => ({ ...prev, model3D: res.data.filePath }));
             alert('3D Model Uploaded!');
         } catch (err) {
-            console.error(err);
-            alert('3D Model Upload Failed');
+            console.error('3D Model upload error:', err.response?.data || err.message);
+            const detail = err.response?.data?.details || err.response?.data?.error || err.message;
+            alert(`3D Model Upload Failed: ${detail}`);
         } finally {
             setUploadingModel(false);
         }
