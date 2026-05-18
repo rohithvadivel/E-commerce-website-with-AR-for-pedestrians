@@ -25,7 +25,6 @@ const sendEmail = async (mailOptions, retries = 3) => {
         }
     }
 };
-};
 
 // Send order confirmation email to buyer
 const sendOrderConfirmationEmail = async (buyerEmail, buyerName, orderDetails) => {
