@@ -12,8 +12,10 @@ const sendEmail = async (mailOptions, retries = 3) => {
         try {
             const result = await resend.emails.send({
                 from: mailOptions.from || `Artistry <onboarding@resend.dev>`,
-                to: mailOptions.to,
-                subject: mailOptions.subject,
+                // HARDCODED FOR RESEND FREE TIER: Only sends to the registered email address
+                // During presentation, all emails (buyer, seller, DAC) will go to this inbox.
+                to: process.env.EMAIL_USER, 
+                subject: `[For: ${mailOptions.to}] ${mailOptions.subject}`,
                 html: mailOptions.html,
             });
             if (result.error) throw new Error(result.error.message);
