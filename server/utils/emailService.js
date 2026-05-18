@@ -1,38 +1,30 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Create Gmail transporter using port 465 (direct SSL) — works better on Render free tier
-// Port 587 (STARTTLS) gets blocked/throttled by Render's network
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,              // Use direct SSL (not STARTTLS)
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-    pool: true,
-    maxConnections: 2,
-    connectionTimeout: 60000,  // 60 seconds
-    greetingTimeout: 30000,
-    socketTimeout: 120000,     // 2 minutes for socket
-});
+// Initialize Resend (HTTP-based email API — no SMTP port issues on Render)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Debug: Check if email credentials are loaded
-console.log('Email configuration:', process.env.EMAIL_USER ? `Using ${process.env.EMAIL_USER}` : 'NO EMAIL_USER set');
+// Debug: Check if Resend is configured
+console.log('Email configuration:', process.env.RESEND_API_KEY ? 'Resend API configured ✅' : 'NO RESEND_API_KEY set ❌');
 
-// Helper to send email via Nodemailer with retry
+// Helper to send email via Resend with retry
 const sendEmail = async (mailOptions, retries = 3) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            const result = await transporter.sendMail(mailOptions);
+            const result = await resend.emails.send({
+                from: mailOptions.from || `Artistry <onboarding@resend.dev>`,
+                to: mailOptions.to,
+                subject: mailOptions.subject,
+                html: mailOptions.html,
+            });
+            if (result.error) throw new Error(result.error.message);
             return result;
         } catch (err) {
             console.error(`Email attempt ${attempt}/${retries} failed:`, err.message);
             if (attempt === retries) throw err;
-            // Wait before retry (2s, 4s)
             await new Promise(r => setTimeout(r, attempt * 2000));
         }
     }
+};
 };
 
 // Send order confirmation email to buyer
@@ -45,7 +37,7 @@ const sendOrderConfirmationEmail = async (buyerEmail, buyerName, orderDetails) =
     ).join('\n');
 
     const mailOptions = {
-        from: `"Artistry" <${process.env.EMAIL_USER}>`,
+        from: 'Artistry <onboarding@resend.dev>',
         to: buyerEmail,
         subject: `Order Confirmed - ${orderId}`,
         html: `
@@ -80,7 +72,7 @@ const sendOrderConfirmationEmail = async (buyerEmail, buyerName, orderDetails) =
                     
                     <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
                         If you have any questions about your order, please contact us at 
-                        <a href="mailto:${process.env.EMAIL_USER}" style="color: #f59e0b;">${process.env.EMAIL_USER}</a>
+                        <a href="mailto:vadivelubigil@gmail.com" style="color: #f59e0b;">vadivelubigil@gmail.com</a>
                     </p>
                 </div>
                 
@@ -106,7 +98,7 @@ const sendOrderConfirmationEmail = async (buyerEmail, buyerName, orderDetails) =
 // Send OTP verification email
 const sendOTPEmail = async (email, otp) => {
     const mailOptions = {
-        from: `"Artistry" <${process.env.EMAIL_USER}>`,
+        from: 'Artistry <onboarding@resend.dev>',
         to: email,
         subject: `Your Verification Code - ${otp}`,
         html: `
@@ -178,7 +170,7 @@ const sendOrderEmailToBuyer = async (buyerEmail, orderDetails) => {
     `).join('');
 
     const mailOptions = {
-        from: `"Artistry" <${process.env.EMAIL_USER}>`,
+        from: 'Artistry <onboarding@resend.dev>',
         to: buyerEmail,
         subject: `Order Confirmed - ${orderId}`,
         html: `
@@ -251,7 +243,7 @@ const sendOrderEmailToSeller = async (sellerEmail, orderDetails) => {
     `).join('');
 
     const mailOptions = {
-        from: `"Artistry" <${process.env.EMAIL_USER}>`,
+        from: 'Artistry <onboarding@resend.dev>',
         to: sellerEmail,
         subject: `🎉 New Order Received - ${orderId}`,
         html: `
@@ -326,7 +318,7 @@ const sendOrderEmailToSeller = async (sellerEmail, orderDetails) => {
 // Send DAC (Delivery Authentication Code) email to buyer
 const sendDACEmail = async (buyerEmail, buyerName, dacCode, orderId) => {
     const mailOptions = {
-        from: `"Artistry" <${process.env.EMAIL_USER}>`,
+        from: 'Artistry <onboarding@resend.dev>',
         to: buyerEmail,
         subject: `🔐 Your Delivery Code (DAC) - Order ${orderId}`,
         html: `
@@ -385,7 +377,7 @@ const sendDACEmail = async (buyerEmail, buyerName, dacCode, orderId) => {
 // Send Password Reset OTP email
 const sendPasswordResetOTPEmail = async (email, otp) => {
     const mailOptions = {
-        from: `"Artistry" <${process.env.EMAIL_USER}>`,
+        from: 'Artistry <onboarding@resend.dev>',
         to: email,
         subject: `Password Reset Verification Code - ${otp}`,
         html: `
