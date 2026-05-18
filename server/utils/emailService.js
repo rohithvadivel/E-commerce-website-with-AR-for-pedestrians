@@ -1,20 +1,35 @@
 const nodemailer = require('nodemailer');
 
-// Create Gmail transporter
+// Create Gmail transporter with extended timeouts for Render free tier
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
+    pool: true,              // Use connection pooling
+    maxConnections: 3,
+    connectionTimeout: 30000, // 30 seconds to establish connection
+    greetingTimeout: 30000,   // 30 seconds for SMTP greeting
+    socketTimeout: 60000,     // 60 seconds for socket inactivity
 });
 
 // Debug: Check if email credentials are loaded
 console.log('Email configuration:', process.env.EMAIL_USER ? `Using ${process.env.EMAIL_USER}` : 'NO EMAIL_USER set');
 
-// Helper to send email via Nodemailer
-const sendEmail = async (mailOptions) => {
-    return transporter.sendMail(mailOptions);
+// Helper to send email via Nodemailer with retry
+const sendEmail = async (mailOptions, retries = 3) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            const result = await transporter.sendMail(mailOptions);
+            return result;
+        } catch (err) {
+            console.error(`Email attempt ${attempt}/${retries} failed:`, err.message);
+            if (attempt === retries) throw err;
+            // Wait before retry (2s, 4s)
+            await new Promise(r => setTimeout(r, attempt * 2000));
+        }
+    }
 };
 
 // Send order confirmation email to buyer
