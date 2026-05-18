@@ -1,17 +1,20 @@
 const nodemailer = require('nodemailer');
 
-// Create Gmail transporter with extended timeouts for Render free tier
+// Create Gmail transporter using port 465 (direct SSL) — works better on Render free tier
+// Port 587 (STARTTLS) gets blocked/throttled by Render's network
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,              // Use direct SSL (not STARTTLS)
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
-    pool: true,              // Use connection pooling
-    maxConnections: 3,
-    connectionTimeout: 30000, // 30 seconds to establish connection
-    greetingTimeout: 30000,   // 30 seconds for SMTP greeting
-    socketTimeout: 60000,     // 60 seconds for socket inactivity
+    pool: true,
+    maxConnections: 2,
+    connectionTimeout: 60000,  // 60 seconds
+    greetingTimeout: 30000,
+    socketTimeout: 120000,     // 2 minutes for socket
 });
 
 // Debug: Check if email credentials are loaded
